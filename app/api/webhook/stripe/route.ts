@@ -1,6 +1,13 @@
 import stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/actions/order.actions";
+import { buffer } from "micro";
+
+export const config = {
+  api: {
+    bodyParser: false, // Disable body parsing
+  },
+};
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -31,7 +38,10 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     };
 
+    console.log(order);
+
     const newOrder = await createOrder(order);
+    console.log(newOrder);
     return NextResponse.json({ message: "OK", order: newOrder });
   }
 

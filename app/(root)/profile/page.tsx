@@ -1,15 +1,24 @@
 import Collection from "@/components/shared/Collection";
 import { Button } from "@/components/ui/button";
 import { getEventsByUser } from "@/lib/actions/event.actions";
+import { getOrdersByUser } from "@/lib/actions/order.actions";
+import { IOrder } from "@/lib/database/models/order.model";
+import { SearchParamProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";
 
-const ProfilePage = async () => {
+const ProfilePage = async ({ searchParams }: SearchParamProps) => {
   const { sessionClaims } = auth();
-
   const userId = sessionClaims?.userId as string;
-  const organizedEvents = await getEventsByUser({ userId, page: 1 });
+
+  const ordersPage = Number(searchParams?.ordersPage) || 1;
+  const eventsPage = Number(searchParams?.eventsPage) || 1;
+
+  const orders = await getOrdersByUser({ userId, page: ordersPage });
+  const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
+
+  const organizedEvents = await getEventsByUser({ userId, page: eventsPage });
   return (
     <>
       {/* MYTICKETS */}
@@ -23,16 +32,16 @@ const ProfilePage = async () => {
       </section>
 
       <section className="wrapper my-8">
-        {/* <Collection
-          data={organizedEvents?.data}
+        <Collection
+          data={orderedEvents}
           emptyTitle="No event tickets purchased yet"
           emptyStateSubtext="No worries - plenty of exciting events to explore!"
           collectionType="My_Tickets"
           limit={3}
-          page={1}
-          totalPages={2}
+          page={ordersPage}
+          totalPages={orders?.totalPages}
           urlParamName="ordersPage"
-        /> */}
+        />
       </section>
 
       {/* EVENTS ORGANIZED */}
@@ -51,8 +60,8 @@ const ProfilePage = async () => {
           emptyStateSubtext="Go create some now"
           collectionType="Events_Organizer"
           limit={6}
-          page={1}
-          totalPages={2}
+          page={eventsPage}
+          totalPages={organizedEvents?.totalPages}
           urlParamName="eventsPage"
         />
       </section>
