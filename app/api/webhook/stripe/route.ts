@@ -3,12 +3,6 @@ import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/actions/order.actions";
 import { buffer } from "micro";
 
-export const config = {
-  api: {
-    bodyParser: false, // Disable body parsing
-  },
-};
-
 export async function POST(request: Request) {
   const body = await request.text();
 
